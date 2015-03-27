@@ -11,10 +11,11 @@ nodes = {
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config| 
   # Virtualbox
-  config.vm.box = "precise64"
-  config.vm.box_url = "http://cloud-images.ubuntu.com/vagrant/precise/current/precise-server-cloudimg-i386-vagrant-disk1.box"
+  config.vm.box = "Ubuntu Server 14.04 LTS"
+  config.vm.box_url = "http://cloud-images.ubuntu.com/vagrant/trusty/current/trusty-server-cloudimg-i386-vagrant-disk1.box"
   config.vm.synced_folder ".", "/vagrant", type: "nfs"
-  config.vm.hostname = 'tin-os'
+  config.vm.hostname = 'ubunut-14lts-os'
+  config.vm.provision :shell, :path => "install.sh"
 
   config.berkshelf.berksfile_path = "Berksfile"
   config.berkshelf.enabled = true
