@@ -1,6 +1,5 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
-# We set the last octet in IPV4 address here
 
 VAGRANTFILE_API_VERSION = "2"
 
@@ -19,13 +18,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.berkshelf.berksfile_path = "Berksfile"
   config.berkshelf.enabled = true
   config.omnibus.chef_version = :latest
-
-#  config.vm.provider "virtualbox" do |vb|
-#  	vb.gui = true
-#  end
-  
-  # Default is 2200..something, but port 2200 is used by forescout NAC agent.
-  config.vm.usable_port_range= 2800..6000
+  config.vm.usable_port_range= 2200..6000
 
   nodes.each do |prefix, (count, ip_start)|
     count.times do |i|
@@ -34,11 +27,10 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       config.vm.define "#{hostname}" do |box|
         box.vm.hostname = "#{hostname}.book"
         box.vm.network "forwarded_port", guest: 8080, host_ip: '127.0.0.1', host: 8080
-        box.vm.network "forwarded_port", guest: 5000, host_ip: '127.0.0.1', host: 5000
         box.vm.network "forwarded_port", guest: 80,   host_ip: '127.0.0.1', host: 80
         box.vm.network "forwarded_port", guest: 22,   host_ip: '127.0.0.1', host: 3022
-        box.vm.network "forwarded_port", guest: 35357, host_ip: '127.0.0.1', host: 35357
-        
+        box.vm.network "forwarded_port", guest: 35357, host: 35357
+        box.vm.network "forwarded_port", guest: 5000, host: 5000
 
         box.vm.provider :virtualbox do |vbox|
           vbox.customize ["modifyvm", :id, "--memory", 2048]
