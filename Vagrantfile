@@ -12,21 +12,25 @@ nodes = {
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # Virtualbox
   config.vm.box = "ubuntu/trusty64"
-  #config.vm.box_url = "http://cloud-images.ubuntu.com/vagrant/trusty/current/trusty-server-cloudimg-i386-vagrant-disk1.box"
-  config.vm.synced_folder ".", "/vagrant", type: "nfs"
+  opts = {
+    create: true,
+    type: 'rsync',
+    rsync__exclude: ['.idea/', '.git/', '*.md'],
+    rsync__args: ['--verbose', '--archive', '--delete', '-z']
+  }
+  
+  config.vm.synced_folder ".", "/vagrant", opts
   config.vm.hostname = 'ubunut-14lts-os'
-  config.vm.provision :shell, :path => "install.sh"
+
+  if Vagrant.has_plugin?("vagrant-vbguest")
+    config.vbguest.auto_update = false
+  end 
 
   if Vagrant.has_plugin?("vagrant-proxyconf")
     #config.proxy.http = ""
     #config.proxy.https = ""
     config.proxy.no_proxy = "localhost,127.0.0.1"
   end
-
-  config.berkshelf.berksfile_path = "Berksfile"
-  config.berkshelf.enabled = true
-  config.omnibus.chef_version = :latest
-  config.vm.usable_port_range= 2200..6000
 
   nodes.each do |prefix, (count, ip_start)|
     count.times do |i|
@@ -41,12 +45,14 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
 
         box.vm.provider :virtualbox do |vbox|
-          vbox.customize ["modifyvm", :id, "--memory", 2048]
-          vbox.customize ["modifyvm", :id, "--cpus", 1]
-          vbox.customize ["modifyvm", :id, "--nicpromisc3", "allow-all"]
-          vbox.customize ["modifyvm", :id, "--nicpromisc4", "allow-all"]
+          vbox.customize ["modifyvm", :id, "--memory", 4056]
+          vbox.customize ["modifyvm", :id, "--cpus", 2]
+          vbox.customize ["modifyvm", :id, '--nictype1', 'virtio']
+          vbox.customize ["modifyvm", :id, '--nictype2', 'virtio']
         end # box.vm virtualbox
       end # config.vm.define
     end # count.times
   end # nodes.each
+  
+  config.vm.provision :shell, :path => "/bin/sh /vagrant/install.sh"
 end # Vagrant.configure("2")
